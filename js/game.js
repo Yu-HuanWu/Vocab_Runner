@@ -18,6 +18,8 @@
   const SCROLL_SPEED = 120;
   const PATH_MARGIN_BOTTOM = 0.08;
   const PATH_MARGIN_TOP = 0.38;
+  const PUSH_BACK_AMOUNT = 180;
+  const STRIPE_SPACING = 60;
 
   let vocabList = [];
   let currentWord = '';
@@ -31,6 +33,7 @@
   let lastTime = 0;
   let animId = null;
   let touchStartX = 0;
+  let worldScrollY = 0;
 
   function resize() {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -114,6 +117,7 @@
     spelledWord = '';
     playerLane = 0;
     penaltyUntil = 0;
+    worldScrollY = 0;
     gameStarted = true;
     updateWordDisplay();
   }
@@ -171,7 +175,7 @@
     const pr = pathRight(height, height, width);
     const ptL = pathLeft(0, height, width);
     const ptR = pathRight(0, height, width);
-    ctx.fillStyle = '#f5f0e8';
+    ctx.fillStyle = '#808080';
     ctx.strokeStyle = '#e8e0d4';
     ctx.lineWidth = 2;
     ctx.beginPath();
@@ -182,6 +186,44 @@
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
+  }
+
+  function drawScrollingBackground(width, height) {
+    const period = STRIPE_SPACING * 7;
+    const offset = worldScrollY % period + 0.5;
+    const pathWidthFrac = 0.06;
+    const dashHeightMin = 1;
+    const dashHeightRange = 42;
+    const gapHeightMin = 40;
+    const gapHeightRange = 36;
+    let screenY = -period + offset;
+    while (screenY < height + period) {
+      const topY = screenY;
+      const scale = depthScale(topY, height);
+      const dashHeight = dashHeightMin + dashHeightRange * scale;
+      const gapHeight = gapHeightMin + gapHeightRange * scale;
+      const bottomY = screenY + dashHeight;
+      const plTop = pathLeft(topY, height, width);
+      const prTop = pathRight(topY, height, width);
+      const plBot = pathLeft(bottomY, height, width);
+      const prBot = pathRight(bottomY, height, width);
+      const cxTop = (plTop + prTop) / 2;
+      const cxBot = (plBot + prBot) / 2;
+      const wTop = (prTop - plTop) * pathWidthFrac;
+      const wBot = (prBot - plBot) * pathWidthFrac;
+      ctx.fillStyle = 'rgba(230, 194, 41, 0.5)';
+      ctx.strokeStyle = 'rgba(201, 164, 30, 0.5)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(cxTop - wTop / 2, topY);
+      ctx.lineTo(cxTop + wTop / 2, topY);
+      ctx.lineTo(cxBot + wBot / 2, bottomY);
+      ctx.lineTo(cxBot - wBot / 2, bottomY);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      screenY += dashHeight + gapHeight;
+    }
   }
 
   function drawGateSet(set, width, height) {
@@ -279,6 +321,7 @@
         }
       } else {
         penaltyUntil = now + PENALTY_MS;
+        worldScrollY = Math.max(0, worldScrollY - PUSH_BACK_AMOUNT);
         const baseY = playerY - GATE_HEIGHT - 140;
         gateSets[gateSetIndex].y = baseY;
         for (let i = gateSetIndex + 1; i < gateSets.length; i++) {
@@ -300,9 +343,11 @@
     const now = Date.now();
     if (now < penaltyUntil) return;
 
+    const scrollDelta = (SCROLL_SPEED / 1000) * dt;
+    worldScrollY += scrollDelta * 0.7;
     for (let i = 0; i < gateSets.length; i++) {
       const scale = Math.max(0.4, depthScale(gateSets[i].y, height));
-      gateSets[i].y += (SCROLL_SPEED / 1000) * scale * dt;
+      gateSets[i].y += scrollDelta * scale;
     }
 
     runCollision(width, height);
@@ -312,6 +357,7 @@
     ctx.fillStyle = '#c9a86c';
     ctx.fillRect(0, 0, width, height);
     drawPath(width, height);
+    drawScrollingBackground(width, height);
 
     const now = Date.now();
     const isFallen = now < penaltyUntil;
@@ -409,3 +455,4 @@
     init();
   }
 })();
+
