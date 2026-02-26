@@ -6,6 +6,8 @@
   const PRELEVEL_SCREEN = document.getElementById('prelevel-screen');
   const TARGET_WORD_EL = document.getElementById('target-word');
   const BEGIN_BTN = document.getElementById('begin-btn');
+  const CONGRATULATIONS_SCREEN = document.getElementById('congratulations-screen');
+  const PLAY_AGAIN_BTN = document.getElementById('play-again-btn');
 
   const ctx = CANVAS.getContext('2d');
   const LANES = 2;
@@ -34,6 +36,10 @@
   let animId = null;
   let touchStartX = 0;
   let worldScrollY = 0;
+  let celebrationUntil = 0;
+  let nextWord = '';
+  let vocabIndex = 0;
+  let allWordsComplete = false;
 
   function resize() {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -99,13 +105,15 @@
       })
       .catch((e) => {
         console.warn('Vocabulary load failed:', e.message);
-        vocabList = ['idk', 'idc', 'huh'];
+        vocabList = ['because', 'idc', 'huh'];
         return vocabList;
       });
   }
 
-  function pickRandomWord() {
-    return vocabList[Math.floor(Math.random() * vocabList.length)];
+  function getNextWord() {
+    if (vocabList.length === 0) return '';
+    vocabIndex = (vocabIndex + 1) % vocabList.length;
+    return vocabList[vocabIndex];
   }
 
   function startLevel(word) {
@@ -117,6 +125,8 @@
     spelledWord = '';
     playerLane = 0;
     penaltyUntil = 0;
+    celebrationUntil = 0;
+    nextWord = '';
     worldScrollY = 0;
     gameStarted = true;
     updateWordDisplay();
@@ -135,19 +145,37 @@
     startLevel(currentWord);
   }
 
+  function showCongratulations() {
+    CONGRATULATIONS_SCREEN.classList.remove('hidden');
+  }
+
+  function hideCongratulationsAndPlayAgain() {
+    CONGRATULATIONS_SCREEN.classList.add('hidden');
+    vocabIndex = 0;
+    showPreLevel(vocabList[0]);
+  }
+
+  const CELEBRATION_MS = 3000;
+
   function updateWordDisplay() {
     const len = currentWordUpper.length;
     const display = spelledWord + '_'.repeat(Math.max(0, len - spelledWord.length));
     WORD_DISPLAY.textContent = 'Word: ' + display;
   }
 
+  function showCelebration() {
+    WORD_DISPLAY.innerHTML = '<span style="color:#27ae60;font-weight:700">' + currentWordUpper + '</span><br><span style="color:#27ae60;font-size:2em">Nice Job!</span>';
+  }
+
   function onWordComplete() {
-    gameStarted = false;
-    gateSets = [];
-    gateSetIndex = 0;
-    spelledWord = '';
-    const next = pickRandomWord();
-    showPreLevel(next);
+    celebrationUntil = Date.now() + CELEBRATION_MS;
+    if (vocabIndex === vocabList.length - 1) {
+      allWordsComplete = true;
+      nextWord = '';
+    } else {
+      nextWord = getNextWord();
+    }
+    showCelebration();
   }
 
   function pathLeft(y, height, width) {
@@ -339,8 +367,24 @@
   }
 
   function update(dt, width, height) {
-    if (!gameStarted || !gateSets.length) return;
     const now = Date.now();
+    if (celebrationUntil > 0) {
+      if (now >= celebrationUntil) {
+        celebrationUntil = 0;
+        gateSets = [];
+        gateSetIndex = 0;
+        spelledWord = '';
+        if (allWordsComplete) {
+          allWordsComplete = false;
+          showCongratulations();
+        } else {
+          showPreLevel(nextWord);
+          nextWord = '';
+        }
+        return;
+      }
+    }
+    if (!gameStarted || !gateSets.length) return;
     if (now < penaltyUntil) return;
 
     const scrollDelta = (SCROLL_SPEED / 1000) * dt;
@@ -439,14 +483,17 @@
     startGameLoop();
 
     loadVocabulary().then(() => {
-      const word = pickRandomWord();
-      showPreLevel(word);
+      if (vocabList.length > 0) {
+        vocabIndex = 0;
+        showPreLevel(vocabList[0]);
+      }
     });
 
     BEGIN_BTN.addEventListener('click', () => {
       if (!currentWord) return;
       hidePreLevelAndStart();
     });
+    PLAY_AGAIN_BTN.addEventListener('click', hideCongratulationsAndPlayAgain);
   }
 
   if (document.readyState === 'loading') {
@@ -455,4 +502,3 @@
     init();
   }
 })();
-
