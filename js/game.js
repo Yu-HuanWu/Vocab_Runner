@@ -282,10 +282,14 @@
         const baseY = playerY - GATE_HEIGHT - 140;
         gateSets[gateSetIndex].y = baseY;
         for (let i = gateSetIndex + 1; i < gateSets.length; i++) {
-          gateSets[i].y = gateSets[i - 1].y - GATE_HEIGHT - gateSets[i - 1].gapAfter;
+          const scale = depthScale(gateSets[i - 1].y, height);
+          gateSets[i].y = gateSets[i - 1].y - GATE_HEIGHT * scale - VISUAL_GAP_TARGET;
         }
         for (let i = gateSetIndex - 1; i >= 0; i--) {
-          gateSets[i].y = gateSets[i + 1].y + GATE_HEIGHT + gateSets[i].gapAfter;
+          const refY = gateSets[i + 1].y;
+          const scale = depthScale(refY, height);
+          const newY = refY + GATE_HEIGHT * scale + VISUAL_GAP_TARGET;
+          gateSets[i].y = newY
         }
       }
     }
@@ -312,7 +316,12 @@
     const now = Date.now();
     const isFallen = now < penaltyUntil;
 
-    gateSets.forEach(set => drawGateSet(set, width, height));
+    const byDepth = gateSets.slice().sort((a, b) => {
+      const d = a.y - b.y;
+      if (d !== 0) return d;
+      return gateSets.indexOf(a) - gateSets.indexOf(b);
+    });
+    byDepth.forEach(set => drawGateSet(set, width, height));
     drawPlayer(width, height, isFallen);
   }
 
