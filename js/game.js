@@ -41,6 +41,7 @@
   let nextWord = '';
   let vocabIndex = 0;
   let allWordsComplete = false;
+  let playerImage = null;
 
   function resize() {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -321,20 +322,26 @@
     ctx.shadowOffsetY = 4;
     if (isFallen) {
       ctx.globalAlpha = 0.8;
-      ctx.translate(laneCenterX, playerY + size * 0.4);
-      ctx.rotate(0.35);
-      ctx.translate(-laneCenterX, -(playerY + size * 0.4));
+      ctx.translate(laneCenterX, playerY);
+      ctx.rotate(Math.PI / 2);
+      ctx.translate(-laneCenterX, -playerY);
     }
-    ctx.fillStyle = isPenalty ? '#c0392b' : '#4a90d9';
-    ctx.beginPath();
-    ctx.arc(laneCenterX, playerY, size, 0, Math.PI * 2);
-    ctx.fill();
+    if (playerImage && playerImage.complete && playerImage.naturalWidth) {
+      const w = size * 3;
+      const h = size * 2.5;
+      ctx.drawImage(playerImage, laneCenterX - w / 2, playerY - h / 2, w, h);
+    } else {
+      ctx.fillStyle = isPenalty ? '#c0392b' : '#4a90d9';
+      ctx.beginPath();
+      ctx.arc(laneCenterX, playerY, size, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = isPenalty ? '#a02820' : '#2d6bb5';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
     ctx.shadowColor = 'transparent';
     ctx.shadowBlur = 0;
     ctx.shadowOffsetY = 0;
-    ctx.strokeStyle = isPenalty ? '#a02820' : '#2d6bb5';
-    ctx.lineWidth = 2;
-    ctx.stroke();
     ctx.restore();
   }
 
@@ -500,6 +507,9 @@
   }
 
   function init() {
+    playerImage = new Image();
+    playerImage.src = new URL('lilaBTruck.png', window.location.href).toString();
+
     resize();
     window.addEventListener('resize', resize);
     initInput();
