@@ -10,7 +10,18 @@
   <div id="game-container">
     <div id="word-display">Word: ____</div>
     <canvas id="game-canvas"></canvas>
-    <div id="prelevel-screen">
+    <div id="start-screen">
+      <h1 id="game-title">Vocab Runner</h1>
+      <div id="list-buttons">
+        <button type="button" class="list-btn" data-list="1">List 1</button>
+        <button type="button" class="list-btn" data-list="2">List 2</button>
+        <button type="button" class="list-btn" data-list="3">List 3</button>
+        <button type="button" class="list-btn" data-list="4">List 4</button>
+        <button type="button" class="list-btn" data-list="5">List 5</button>
+        <button type="button" class="list-btn" data-list="6">List 6</button>
+      </div>
+    </div>
+    <div id="prelevel-screen" class="hidden">
       <p id="target-word">WORLD</p>
       <button id="begin-btn" type="button">Begin</button>
     </div>
