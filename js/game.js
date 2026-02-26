@@ -3,6 +3,7 @@
 
   const WORD_DISPLAY = document.getElementById('word-display');
   const CANVAS = document.getElementById('game-canvas');
+  const START_SCREEN = document.getElementById('start-screen');
   const PRELEVEL_SCREEN = document.getElementById('prelevel-screen');
   const TARGET_WORD_EL = document.getElementById('target-word');
   const BEGIN_BTN = document.getElementById('begin-btn');
@@ -91,8 +92,9 @@
     return sets;
   }
 
-  function loadVocabulary() {
-    const url = new URL('vocabulary.txt', window.location.href).toString();
+  function loadVocabularyFromList(listNum) {
+    const path = 'vocabulary/list' + listNum + '.txt';
+    const url = new URL(path, window.location.href).toString();
     return fetch(url)
       .then(r => {
         if (!r.ok) throw new Error(r.statusText);
@@ -100,14 +102,24 @@
       })
       .then(text => {
         vocabList = text.split('\n').map(s => s.trim().toLowerCase()).filter(Boolean);
-        if (vocabList.length === 0) vocabList = ['world'];
+        if (vocabList.length === 0) vocabList = ['empty'];
         return vocabList;
       })
       .catch((e) => {
         console.warn('Vocabulary load failed:', e.message);
-        vocabList = ['because', 'idc', 'huh'];
+        vocabList = ['test', 'QA', 'debug'];
         return vocabList;
       });
+  }
+
+  function onListSelected(listNum) {
+    loadVocabularyFromList(listNum).then(() => {
+      if (vocabList.length > 0) {
+        vocabIndex = 0;
+        START_SCREEN.classList.add('hidden');
+        showPreLevel(vocabList[0]);
+      }
+    });
   }
 
   function getNextWord() {
@@ -151,8 +163,7 @@
 
   function hideCongratulationsAndPlayAgain() {
     CONGRATULATIONS_SCREEN.classList.add('hidden');
-    vocabIndex = 0;
-    showPreLevel(vocabList[0]);
+    START_SCREEN.classList.remove('hidden');
   }
 
   const CELEBRATION_MS = 3000;
@@ -482,11 +493,11 @@
 
     startGameLoop();
 
-    loadVocabulary().then(() => {
-      if (vocabList.length > 0) {
-        vocabIndex = 0;
-        showPreLevel(vocabList[0]);
-      }
+    document.querySelectorAll('.list-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const listNum = parseInt(btn.getAttribute('data-list'), 10);
+        if (listNum >= 1 && listNum <= 6) onListSelected(listNum);
+      });
     });
 
     BEGIN_BTN.addEventListener('click', () => {
