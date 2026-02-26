@@ -416,14 +416,27 @@
 
     const now = Date.now();
     const isFallen = now < penaltyUntil;
+    const playerY = pathCenterY(height);
 
-    const byDepth = gateSets.slice().sort((a, b) => {
+    const sortByDepth = (a, b) => {
       const d = a.y - b.y;
       if (d !== 0) return d;
       return gateSets.indexOf(a) - gateSets.indexOf(b);
-    });
-    byDepth.forEach(set => drawGateSet(set, width, height));
+    };
+
+    const inFrontOfPlayer = gateSets.filter(set => {
+      const gateCenterY = set.y + GATE_HEIGHT * 0.2 * depthScale(set.y, height);
+      return gateCenterY < playerY;
+    }).sort(sortByDepth);
+
+    const pastPlayer = gateSets.filter(set => {
+      const gateCenterY = set.y + GATE_HEIGHT * 0.75 * depthScale(set.y, height);
+      return gateCenterY >= playerY;
+    }).sort(sortByDepth);
+
+    inFrontOfPlayer.forEach(set => drawGateSet(set, width, height));
     drawPlayer(width, height, isFallen);
+    pastPlayer.forEach(set => drawGateSet(set, width, height));
   }
 
   function gameLoop(now) {
