@@ -164,9 +164,30 @@ html, body {
 #congratulations-text {
   font-family: system-ui, sans-serif;
   font-size: clamp(28px, 8vw, 30px);
-  font-weight: 00;
-  color: #2d2d2d;
+  font-weight: 700;
   letter-spacing: 0.1em;
+  background: linear-gradient(
+    105deg,
+    #1a5f2a 0%,
+    #097034 25%,
+    #0e8f37 50%,
+    #097034 75%,
+    #1a5f2a 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: none;
+  filter: drop-shadow(0 0 6px rgba(46, 204, 113, 0.9))
+          drop-shadow(0 0 14px rgba(39, 174, 96, 0.8))
+          drop-shadow(0 0 24px rgba(39, 174, 96, 0.6));
+  animation: congratulations-shine 3s ease-in-out infinite;
+}
+
+@keyframes congratulations-shine {
+  0%, 100% { background-position: 0% center; }
+  50% { background-position: 100% center; }
 }
 
 #play-again-btn {
