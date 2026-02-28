@@ -19,7 +19,7 @@
   const VISUAL_GAP_TARGET = 100;
   const PLAYER_ZONE_TOP = 0.7;
   const SCROLL_SPEED = 120;
-  const SCROLL_SPEED_INCREASE_PER_WORD = 0.35;
+  const SCROLL_SPEED_INCREASE_PER_WORD = 0.20;
   const PATH_MARGIN_BOTTOM = 0.08;
   const PATH_MARGIN_TOP = 0.38;
   const PUSH_BACK_AMOUNT = 180;
@@ -42,7 +42,7 @@
   let nextWord = '';
   let vocabIndex = 0;
   let allWordsComplete = false;
-  let playerImage = null;
+  const playerAvatars = [null, null, null]; // [0] = car (1-5), [1] = truck (6-10), [2] = tank (11+)
 
   function resize() {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -109,7 +109,7 @@
       })
       .catch((e) => {
         console.warn('Vocabulary load failed:', e.message);
-        vocabList = ['test', 'QA', 'debug'];
+        vocabList = ['test', 'QA', 'debug', 'idk', 'huh', 'wow', 'idc', 'lila', 'car', 'truck', 'tank'];
         return vocabList;
       });
   }
@@ -327,10 +327,12 @@
       ctx.rotate(Math.PI / 2);
       ctx.translate(-laneCenterX, -playerY);
     }
-    if (playerImage && playerImage.complete && playerImage.naturalWidth) {
+    const avatarIndex = Math.min(2, Math.floor(vocabIndex / 5)); // 0: 1-5, 1: 6-10, 2: 11+
+    const img = playerAvatars[avatarIndex];
+    if (img && img.complete && img.naturalWidth) {
       const w = size * 3;
       const h = size * 2.5;
-      ctx.drawImage(playerImage, laneCenterX - w / 2, playerY - h / 2, w, h);
+      ctx.drawImage(img, laneCenterX - w / 2, playerY - h / 2, w, h);
     } else {
       ctx.fillStyle = isPenalty ? '#c0392b' : '#4a90d9';
       ctx.beginPath();
@@ -510,8 +512,12 @@
   }
 
   function init() {
-    playerImage = new Image();
-    playerImage.src = new URL('lilaBTruck.png', window.location.href).toString();
+    playerAvatars[0] = new Image();
+    playerAvatars[0].src = new URL('lilaBCar.png', window.location.href).toString();
+    playerAvatars[1] = new Image();
+    playerAvatars[1].src = new URL('lilaBTruck.png', window.location.href).toString();
+    playerAvatars[2] = new Image();
+    playerAvatars[2].src = new URL('lilaBTank.png', window.location.href).toString();
 
     resize();
     window.addEventListener('resize', resize);
