@@ -19,6 +19,7 @@
   const VISUAL_GAP_TARGET = 100;
   const PLAYER_ZONE_TOP = 0.7;
   const SCROLL_SPEED = 120;
+  const SCROLL_SPEED_INCREASE_PER_WORD = 0.35;
   const PATH_MARGIN_BOTTOM = 0.08;
   const PATH_MARGIN_TOP = 0.38;
   const PUSH_BACK_AMOUNT = 180;
@@ -405,7 +406,9 @@
     if (!gameStarted || !gateSets.length) return;
     if (now < penaltyUntil) return;
 
-    const scrollDelta = (SCROLL_SPEED / 1000) * dt;
+    const speedMultiplier = 1 + vocabIndex * SCROLL_SPEED_INCREASE_PER_WORD;
+    const effectiveSpeed = SCROLL_SPEED * speedMultiplier;
+    const scrollDelta = (effectiveSpeed / 1000) * dt;
     worldScrollY += scrollDelta * 0.7;
     for (let i = 0; i < gateSets.length; i++) {
       const scale = Math.max(0.4, depthScale(gateSets[i].y, height));
