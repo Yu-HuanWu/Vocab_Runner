@@ -439,7 +439,10 @@
   }
 
   function draw(width, height) {
-    ctx.fillStyle = '#c9a86c';
+    const bgGradient = ctx.createLinearGradient(0, 0, 0, height);
+    bgGradient.addColorStop(0, '#e0c9a0');
+    bgGradient.addColorStop(1, '#c9a86c');
+    ctx.fillStyle = bgGradient;
     ctx.fillRect(0, 0, width, height);
     drawPath(width, height);
     drawScrollingBackground(width, height);
