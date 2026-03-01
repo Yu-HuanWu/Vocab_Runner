@@ -32,6 +32,8 @@
   let gateSetIndex = 0;
   let spelledWord = '';
   let playerLane = 0;
+  let playerVisualX = null;
+  const AVATAR_MOVE_SPEED = 0.23;
   let gameStarted = false;
   let penaltyUntil = 0;
   let lastTime = 0;
@@ -139,6 +141,7 @@
     gateSetIndex = 0;
     spelledWord = '';
     playerLane = 0;
+    playerVisualX = null;
     penaltyUntil = 0;
     celebrationUntil = 0;
     nextWord = '';
@@ -313,7 +316,10 @@
     const pl = pathLeft(playerY, height, width);
     const pr = pathRight(playerY, height, width);
     const pathW = pr - pl;
-    const laneCenterX = pl + pathW * (0.25 + playerLane * 0.5);
+    const targetX = pl + pathW * (0.25 + playerLane * 0.5);
+    if (playerVisualX === null) playerVisualX = targetX;
+    else playerVisualX += (targetX - playerVisualX) * AVATAR_MOVE_SPEED;
+    const laneCenterX = playerVisualX;
     const size = Math.min(pathW * 0.12, 28);
     const now = Date.now();
     const isPenalty = now < penaltyUntil;
@@ -359,7 +365,7 @@
     const pl = pathLeft(midY, height, width);
     const pr = pathRight(midY, height, width);
     const pathW = pr - pl;
-    const centerX = pl + pathW * (0.25 + playerLane * 0.5);
+    const centerX = playerVisualX !== null ? playerVisualX : pl + pathW * (0.25 + playerLane * 0.5);
     const size = Math.min(pathW * 0.5, 56);
     ctx.save();
     ctx.drawImage(collisionImage, centerX - size / 2, midY - size / 2, size, size);
