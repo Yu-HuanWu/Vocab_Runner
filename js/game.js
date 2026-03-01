@@ -43,6 +43,7 @@
   let vocabIndex = 0;
   let allWordsComplete = false;
   const playerAvatars = [null, null, null]; // [0] = car (1-5), [1] = truck (6-10), [2] = tank (11+)
+  let collisionImage = null;
 
   function resize() {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -348,7 +349,24 @@
     ctx.restore();
   }
 
-  function runCollision(width, height) {
+  function drawCollision(width, height) {
+    if (!collisionImage || !collisionImage.complete || !collisionImage.naturalWidth) return;
+    const playerY = pathCenterY(height);
+    const set = gateSets[gateSetIndex];
+    const gateH = GATE_HEIGHT * depthScale(set.y, height);
+    const gateCenterY = set.y + gateH / 2;
+    const midY = (playerY + gateCenterY) / 2;
+    const pl = pathLeft(midY, height, width);
+    const pr = pathRight(midY, height, width);
+    const pathW = pr - pl;
+    const centerX = pl + pathW * (0.25 + playerLane * 0.5);
+    const size = Math.min(pathW * 0.5, 56);
+    ctx.save();
+    ctx.drawImage(collisionImage, centerX - size / 2, midY - size / 2, size, size);
+    ctx.restore();
+  }
+
+  function runCollision(height) {
     const playerY = height * PLAYER_ZONE_TOP;
     const now = Date.now();
     if (now < penaltyUntil) return;
@@ -387,7 +405,7 @@
     }
   }
 
-  function update(dt, width, height) {
+  function update(dt, height) {
     const now = Date.now();
     if (celebrationUntil > 0) {
       if (now >= celebrationUntil) {
@@ -417,7 +435,7 @@
       gateSets[i].y += scrollDelta * scale;
     }
 
-    runCollision(width, height);
+    runCollision(height);
   }
 
   function draw(width, height) {
@@ -448,6 +466,7 @@
 
     inFrontOfPlayer.forEach(set => drawGateSet(set, width, height));
     drawPlayer(width, height, isFallen);
+    if (isFallen && gateSetIndex < gateSets.length) drawCollision(width, height);
     pastPlayer.forEach(set => drawGateSet(set, width, height));
   }
 
@@ -457,7 +476,7 @@
     const dt = lastTime ? Math.min(now - lastTime, 100) : 16;
     lastTime = now;
 
-    update(dt, width, height);
+    update(dt, height);
     draw(width, height);
 
     animId = requestAnimationFrame(gameLoop);
@@ -518,6 +537,8 @@
     playerAvatars[1].src = new URL('lilaBTruck.png', window.location.href).toString();
     playerAvatars[2] = new Image();
     playerAvatars[2].src = new URL('lilaBTank.png', window.location.href).toString();
+    collisionImage = new Image();
+    collisionImage.src = new URL('collision.png', window.location.href).toString();
 
     resize();
     window.addEventListener('resize', resize);
