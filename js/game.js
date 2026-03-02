@@ -220,7 +220,10 @@
     const pr = pathRight(height, height, width);
     const ptL = pathLeft(0, height, width);
     const ptR = pathRight(0, height, width);
-    ctx.fillStyle = '#808080';
+    const pathGradient = ctx.createLinearGradient(0, 0, 0, height);
+    pathGradient.addColorStop(0, '#b3b1b1');
+    pathGradient.addColorStop(1, '#808080');
+    ctx.fillStyle = pathGradient;
     ctx.strokeStyle = '#e8e0d4';
     ctx.lineWidth = 2;
     ctx.beginPath();
