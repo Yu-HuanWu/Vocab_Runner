@@ -8,6 +8,7 @@
   const TARGET_WORD_EL = document.getElementById('target-word');
   const BEGIN_BTN = document.getElementById('begin-btn');
   const CONGRATULATIONS_SCREEN = document.getElementById('congratulations-screen');
+  const STATS_TEXT = document.getElementById('stats-text');
   const PLAY_AGAIN_BTN = document.getElementById('play-again-btn');
 
   const ctx = CANVAS.getContext('2d');
@@ -44,6 +45,7 @@
   let nextWord = '';
   let vocabIndex = 0;
   let allWordsComplete = false;
+  let wallBumps = 0;
   const playerAvatars = [null, null, null]; // [0] = car (1-5), [1] = truck (6-10), [2] = tank (11+)
   let collisionImage = null;
 
@@ -121,6 +123,7 @@
     loadVocabularyFromList(listNum).then(() => {
       if (vocabList.length > 0) {
         vocabIndex = 0;
+        wallBumps = 0;
         START_SCREEN.classList.add('hidden');
         showPreLevel(vocabList[0]);
       }
@@ -164,6 +167,7 @@
   }
 
   function showCongratulations() {
+    STATS_TEXT.textContent = 'Walls bumped: ' + wallBumps;
     CONGRATULATIONS_SCREEN.classList.remove('hidden');
   }
 
@@ -396,6 +400,7 @@
           onWordComplete();
         }
       } else {
+        wallBumps++;
         penaltyUntil = now + PENALTY_MS;
         worldScrollY = Math.max(0, worldScrollY - PUSH_BACK_AMOUNT);
         const baseY = playerY - GATE_HEIGHT - 140;
