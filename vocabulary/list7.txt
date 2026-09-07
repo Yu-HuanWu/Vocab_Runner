@@ -1,4 +1,9 @@
-hum
+magnet
+frantic
+basket
+sunlit
+admit
+invent
 drab
 left
 spot
@@ -10,11 +15,6 @@ stop
 sled
 rust
 chat
-sunlit
-admit
-invent
 mix
 ship
-magnet
-frantic
-basket
+hum
