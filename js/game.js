@@ -517,15 +517,16 @@
 
   function onPointerDown(x) {
     if (!gameStarted) return;
-    const width = CANVAS.clientWidth;
-    setLane(x < width / 2 ? 0 : 1);
+    const rect = CANVAS.getBoundingClientRect();
+    const localX = x - rect.left;
+    setLane(localX < rect.width / 2 ? 0 : 1);
   }
 
   function onPointerMove(x) {
     if (!gameStarted) return;
-    const width = CANVAS.clientWidth;
-    const lane = x < width / 2 ? 0 : 1;
-    setLane(lane);
+    const rect = CANVAS.getBoundingClientRect();
+    const localX = x - rect.left;
+    setLane(localX < rect.width / 2 ? 0 : 1);
   }
 
   function initInput() {
