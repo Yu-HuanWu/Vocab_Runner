@@ -561,7 +561,7 @@
     document.querySelectorAll('.list-btn').forEach((btn) => {
       btn.addEventListener('click', () => {
         const listNum = parseInt(btn.getAttribute('data-list'), 10);
-        if (listNum >= 1 && listNum <= 6) onListSelected(listNum);
+        if (listNum >= 1 && listNum <= 7) onListSelected(listNum);
       });
     });
 
