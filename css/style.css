@@ -190,6 +190,14 @@ html, body {
   50% { background-position: 100% center; }
 }
 
+#stats-text {
+  font-family: system-ui, sans-serif;
+  font-size: clamp(18px, 5vw, 24px);
+  font-weight: 600;
+  color: #2d2d2d;
+  letter-spacing: 0.05em;
+}
+
 #play-again-btn {
   padding: 12px 28px;
   font-size: 17px;
